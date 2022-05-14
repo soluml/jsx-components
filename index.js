@@ -1,3 +1,5 @@
+const { default: generate } = require("@babel/generator");
+
 module.exports = function (babel) {
   const t = babel.types;
   const constFactory = function (identifier, memberExpression, arguments) {
@@ -27,13 +29,32 @@ module.exports = function (babel) {
         const openingElement = path.node.openingElement;
         const elementName = openingElement.name.name;
         const isWrappingElement = path.parentPath.type !== "JSXElement";
-        const attributes = openingElement.attributes.reduce(
-          (acc, { name, value }) => ({
-            ...acc,
-            [name.name]: value.value,
-          }),
+        const props = openingElement.attributes.reduce(
+          (acc, { name, value }) => {
+            function getValue() {
+              if (value?.type === "JSXExpressionContainer") {
+                const { expression } = value;
+
+                return eval(generate(expression).code);
+              }
+
+              return value?.value ?? true;
+            }
+
+            return {
+              ...acc,
+              [name.name]: getValue(),
+            };
+          },
           {}
         );
+
+        // const [events, attributes] = Object.entries(props).reduce(
+        //   (acc, [name, value]) => {
+        //     console.log({ name, value });
+        //   },
+        //   [{}, {}]
+        // );
 
         if (isWrappingElement) {
           const {
@@ -41,7 +62,17 @@ module.exports = function (babel) {
             delegatesFocus = true,
             style,
             ...rest
-          } = attributes;
+          } = props;
+
+          const definition = t.ExpressionStatement(
+            t.CallExpression(
+              t.MemberExpression(
+                t.Identifier("customElements"),
+                t.Identifier("define")
+              ),
+              [t.StringLiteral(elementName), t.Identifier(elementName)]
+            )
+          );
 
           const constructor = t.ClassMethod(
             "constructor",
@@ -101,8 +132,6 @@ module.exports = function (babel) {
               ),
             ])
           );
-
-          console.log({ attributes, fn: t.AssignmentExpression.toString() });
 
           path.replaceWith(
             t.ClassDeclaration(
