@@ -393,7 +393,7 @@ module.exports = function (babel) {
           : [];
 
         const ClassExpression = t.ClassExpression(
-          t.Identifier(elementName.replace("-", "")),
+          t.Identifier(elementName.replaceAll("-", "")),
           t.Identifier("HTMLElement"),
           t.ClassBody([
             observedAttributes,
