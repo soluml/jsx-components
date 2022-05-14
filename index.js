@@ -133,7 +133,7 @@ module.exports = function (babel) {
         attributes,
       };
     } else {
-      // console.log({ attributes });
+      console.log({ observed });
 
       return [
         //Create the element
@@ -225,10 +225,6 @@ module.exports = function (babel) {
           false,
           true
         );
-
-        // console.log("=========================");
-        // console.log(JSON.stringify(children.flat(Infinity), null, 2));
-        // console.log("=========================");
 
         const constructor = t.ClassMethod(
           "constructor",

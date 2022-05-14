@@ -8,9 +8,10 @@ export const OpenButton = (
       console.log("disabled", { oldValue, newValue }, this);
     }}
   >
-    <div>
-      <p>Hello World</p>
-    </div>
+    <button type="button" onClick={() => console.log("Open Dialog")}>
+      Open Dialog
+    </button>
+    <dialog />
   </Cmpt-OpenButton>
 );
 
