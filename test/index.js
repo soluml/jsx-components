@@ -16,6 +16,6 @@ export const OpenButton = (
 
 export const MyParagraph = (
   <Cmpt-My-Paragraph style="aasda" link={"p.css"} extends="p">
-    Hello <slot name="subject">World</slot>
+    Hello <slot name="subject">World</slot>!
   </Cmpt-My-Paragraph>
 );
