@@ -149,11 +149,40 @@ module.exports = function (babel) {
             ])
           );
 
+          const attributeChangedCallback = t.ClassMethod(
+            "method",
+            t.Identifier("attributeChangedCallback"),
+            [
+              t.Identifier("name"),
+              t.Identifier("oldValue"),
+              t.Identifier("newValue"),
+            ],
+            t.BlockStatement([
+              t.ExpressionStatement(
+                t.CallExpression(
+                  t.MemberExpression(
+                    t.MemberExpression(
+                      t.ThisExpression(),
+                      t.Identifier("attributes")
+                    ),
+                    t.Identifier("name"),
+                    true
+                  ),
+                  [t.Identifier("oldValue"), t.Identifier("newValue")]
+                )
+              ),
+            ])
+          );
+
           path.replaceWith(
             t.ClassDeclaration(
               t.Identifier(elementName),
               t.Identifier("HTMLElement"),
-              t.ClassBody([observedAttributes, constructor])
+              t.ClassBody([
+                observedAttributes,
+                constructor,
+                attributeChangedCallback,
+              ])
             )
           );
         } else {
