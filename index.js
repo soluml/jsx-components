@@ -29,6 +29,7 @@ module.exports = function (babel) {
       JSXElement(path) {
         const openingElement = path.node.openingElement;
         const elementName = openingElement.name.name;
+        const tagName = elementName.toLowerCase();
 
         if (!elementName.includes("-")) {
           throw new Error(
@@ -267,16 +268,16 @@ module.exports = function (babel) {
 
           path.replaceWith(
             t.ExpressionStatement(
-              t.CallExpression(
-                t.MemberExpression(
-                  t.Identifier("customElements"),
-                  t.Identifier("define")
+              t.LogicalExpression(
+                "||",
+                t.CallExpression(
+                  t.MemberExpression(
+                    t.Identifier("customElements"),
+                    t.Identifier("define")
+                  ),
+                  [t.StringLiteral(tagName), ClassExpression, ...extension]
                 ),
-                [
-                  t.StringLiteral(elementName.toLowerCase()),
-                  ClassExpression,
-                  ...extension,
-                ]
+                t.StringLiteral(tagName)
               )
             )
           );
