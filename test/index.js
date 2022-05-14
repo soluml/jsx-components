@@ -1,7 +1,12 @@
 export const OpenButton = (
   <Cmpt-OpenButton
     link={["button.css", "dialog.css"]}
-    open={(oldValue, newValue) => console.log("open", { oldValue, newValue })}
+    open={(oldValue, newValue) =>
+      console.log("open", { oldValue, newValue }, this)
+    }
+    disabled={function Test(oldValue, newValue) {
+      console.log("disabled", { oldValue, newValue }, this);
+    }}
   >
     <div>
       <p>Hello World</p>

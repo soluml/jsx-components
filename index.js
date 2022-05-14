@@ -50,7 +50,7 @@ module.exports = function (babel) {
                 const { code } = generator(expression);
 
                 if (typeof eval(code) === "function") {
-                  expression = parseExpression(`${code}.bind(shadow)`);
+                  expression = parseExpression(`${code}.bind(this.shadow)`);
                 }
 
                 return expression;
@@ -119,22 +119,33 @@ module.exports = function (babel) {
               t.ExpressionStatement(
                 t.CallExpression(t.identifier("super"), [])
               ),
-              // const shadow = this.attachShadow
-              constFactory(
-                "shadow",
-                [t.ThisExpression(), t.Identifier("attachShadow")],
-                [
-                  t.ObjectExpression([
-                    t.ObjectProperty(
-                      t.Identifier("mode"),
-                      t.stringLiteral(mode)
+              // this.shadow = this.attachShadow
+              t.ExpressionStatement(
+                t.AssignmentExpression(
+                  "=",
+                  t.MemberExpression(
+                    t.ThisExpression(),
+                    t.Identifier("shadow")
+                  ),
+                  t.CallExpression(
+                    t.MemberExpression(
+                      t.ThisExpression(),
+                      t.Identifier("attachShadow")
                     ),
-                    t.ObjectProperty(
-                      t.Identifier("delegatesFocus"),
-                      t.BooleanLiteral(delegatesFocus)
-                    ),
-                  ]),
-                ]
+                    [
+                      t.ObjectExpression([
+                        t.ObjectProperty(
+                          t.Identifier("mode"),
+                          t.stringLiteral(mode)
+                        ),
+                        t.ObjectProperty(
+                          t.Identifier("delegatesFocus"),
+                          t.BooleanLiteral(delegatesFocus)
+                        ),
+                      ]),
+                    ]
+                  )
+                )
               ),
               // const link = document.createElement('link')
               ...(link
@@ -222,7 +233,10 @@ module.exports = function (babel) {
                 t.ExpressionStatement(
                   t.CallExpression(
                     t.MemberExpression(
-                      t.Identifier("shadow"),
+                      t.MemberExpression(
+                        t.ThisExpression(),
+                        t.Identifier("shadow")
+                      ),
                       t.Identifier("appendChild")
                     ),
                     [t.Identifier(identifier)]
