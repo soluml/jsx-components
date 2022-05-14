@@ -1,3 +1,5 @@
+const { default: generator } = require("@babel/generator");
+
 module.exports = function (babel) {
   const t = babel.types;
   const constFactory = function (identifier, memberExpression, arguments) {
@@ -79,9 +81,10 @@ module.exports = function (babel) {
 
           attributes = _ra;
           observed = _ro;
-          link = alink || olink;
-
-          console.log({ link });
+          link =
+            [alink] || olink
+              ? [eval(generator(olink).code)].flat(Infinity)
+              : undefined;
 
           const observedAttributes = t.ClassMethod(
             "get",
@@ -124,6 +127,47 @@ module.exports = function (babel) {
                   ]),
                 ]
               ),
+              // const link = document.createElement('link')
+              ...(link
+                ? [
+                    ...link
+                      .map((l, i) => {
+                        const key = "link" + i;
+
+                        return [
+                          constFactory(
+                            key,
+                            [
+                              t.Identifier("document"),
+                              t.Identifier("createElement"),
+                            ],
+                            [t.stringLiteral("link")]
+                          ),
+                          t.ExpressionStatement(
+                            t.AssignmentExpression(
+                              "=",
+                              t.MemberExpression(
+                                t.Identifier(key),
+                                t.Identifier("rel")
+                              ),
+                              t.stringLiteral("stylesheet")
+                            )
+                          ),
+                          t.ExpressionStatement(
+                            t.AssignmentExpression(
+                              "=",
+                              t.MemberExpression(
+                                t.Identifier(key),
+                                t.Identifier("href")
+                              ),
+                              t.stringLiteral(l)
+                            )
+                          ),
+                        ];
+                      })
+                      .flat(Infinity),
+                  ]
+                : []),
               // const style = document.createElement('style')
               constFactory(
                 "style",
@@ -158,16 +202,17 @@ module.exports = function (babel) {
                 )
               ),
               // shadow.append()
-              ...["style"].map((identifier) =>
-                t.ExpressionStatement(
-                  t.CallExpression(
-                    t.MemberExpression(
-                      t.Identifier("shadow"),
-                      t.Identifier("appendChild")
-                    ),
-                    [t.Identifier(identifier)]
+              ...[...link.map((_, i) => "link" + i), "style"].map(
+                (identifier) =>
+                  t.ExpressionStatement(
+                    t.CallExpression(
+                      t.MemberExpression(
+                        t.Identifier("shadow"),
+                        t.Identifier("appendChild")
+                      ),
+                      [t.Identifier(identifier)]
+                    )
                   )
-                )
               ),
             ])
           );
