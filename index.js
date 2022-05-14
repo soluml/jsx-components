@@ -70,6 +70,7 @@ module.exports = function (babel) {
           const {
             mode = "open",
             delegatesFocus = true,
+            extends: ex,
             style,
             ...rest
           } = attributes;
@@ -184,6 +185,17 @@ module.exports = function (babel) {
             ])
           );
 
+          const extension = ex
+            ? [
+                t.ObjectExpression([
+                  t.ObjectProperty(
+                    t.Identifier("extends"),
+                    t.StringLiteral(ex)
+                  ),
+                ]),
+              ]
+            : [];
+
           const ClassExpression = t.ClassExpression(
             t.Identifier(elementName.replace("-", "")),
             t.Identifier("HTMLElement"),
@@ -201,7 +213,11 @@ module.exports = function (babel) {
                   t.Identifier("customElements"),
                   t.Identifier("define")
                 ),
-                [t.StringLiteral(elementName.toLowerCase()), ClassExpression]
+                [
+                  t.StringLiteral(elementName.toLowerCase()),
+                  ClassExpression,
+                  ...extension,
+                ]
               )
             )
           );
