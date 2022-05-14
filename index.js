@@ -89,9 +89,11 @@ module.exports = function (babel) {
           attributes = _ra;
           observed = _ro;
           link =
-            [alink] || olink
+            (alink ? [alink] : undefined) ||
+            (olink
               ? [eval(generator(olink).code)].flat(Infinity)
-              : undefined;
+              : undefined) ||
+            [];
 
           const observedAttributes = t.ClassMethod(
             "get",
@@ -175,23 +177,27 @@ module.exports = function (babel) {
                       .flat(Infinity),
                   ]
                 : []),
-              // const style = document.createElement('style')
-              constFactory(
-                "style",
-                [t.Identifier("document"), t.Identifier("createElement")],
-                [t.stringLiteral("style")]
-              ),
-              // style.textContent = `style`;
-              t.ExpressionStatement(
-                t.AssignmentExpression(
-                  "=",
-                  t.MemberExpression(
-                    t.Identifier("style"),
-                    t.Identifier("textContent")
-                  ),
-                  t.stringLiteral(style)
-                )
-              ),
+              ...(style
+                ? [
+                    // const style = document.createElement('style')
+                    constFactory(
+                      "style",
+                      [t.Identifier("document"), t.Identifier("createElement")],
+                      [t.stringLiteral("style")]
+                    ),
+                    // style.textContent = `style`;
+                    t.ExpressionStatement(
+                      t.AssignmentExpression(
+                        "=",
+                        t.MemberExpression(
+                          t.Identifier("style"),
+                          t.Identifier("textContent")
+                        ),
+                        t.stringLiteral(style)
+                      )
+                    ),
+                  ]
+                : []),
               //
               // this.attributes = { ... }
               t.ExpressionStatement(
@@ -209,17 +215,19 @@ module.exports = function (babel) {
                 )
               ),
               // shadow.append()
-              ...[...link.map((_, i) => "link" + i), "style"].map(
-                (identifier) =>
-                  t.ExpressionStatement(
-                    t.CallExpression(
-                      t.MemberExpression(
-                        t.Identifier("shadow"),
-                        t.Identifier("appendChild")
-                      ),
-                      [t.Identifier(identifier)]
-                    )
+              ...[
+                ...link.map((_, i) => "link" + i), // If we have link's
+                ...(style ? ["style"] : []), // If we have style
+              ].map((identifier) =>
+                t.ExpressionStatement(
+                  t.CallExpression(
+                    t.MemberExpression(
+                      t.Identifier("shadow"),
+                      t.Identifier("appendChild")
+                    ),
+                    [t.Identifier(identifier)]
                   )
+                )
               ),
             ])
           );
@@ -284,41 +292,6 @@ module.exports = function (babel) {
         } else {
           // console.log(path.node.children);
         }
-
-        // const wrapper = t.ClassDeclaration();
-
-        //     types: 'function classDeclaration(id, superClass, body, decorators) {\n' +
-        // '  return _builder.default.apply("ClassDeclaration", arguments);\n' +
-        // '}'
-
-        // //get the opening element from jsxElement node
-        // var openingElement = path.node.openingElement;
-        // //tagname is name of tag like div, p etc
-        // var tagName = openingElement.name.name;
-        // // arguments for React.createElement function
-        // var args = [];
-        // //adds "div" or any tag as a string as one of the argument
-        // args.push(t.stringLiteral(tagName));
-        // // as we are considering props as null for now
-        // var attribs = t.nullLiteral();
-        // //push props or other attributes which is null for now
-        // args.push(attribs);
-        // // order in AST Top to bottom -> (CallExpression => MemberExpression => Identifiers)
-        // // below are the steps to create a callExpression
-        // var reactIdentifier = t.identifier("React"); //object
-        // var createElementIdentifier = t.identifier("createElement"); //property of object
-        // var callee = t.memberExpression(
-        //   reactIdentifier,
-        //   createElementIdentifier
-        // );
-        // var callExpression = t.callExpression(callee, args);
-        // //now add children as a third argument
-        // callExpression.arguments = callExpression.arguments.concat(
-        //   path.node.children
-        // );
-        // // replace jsxElement node with the call expression node made above
-
-        // path.replaceWith(callExpression, path.node);
       },
     },
   };

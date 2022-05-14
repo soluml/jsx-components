@@ -1,4 +1,4 @@
-export default (
+export const Test = (
   <Cmpt-Wrapper
     style="aasda"
     link={["reset.css", "cmpt.css"]}
@@ -8,4 +8,10 @@ export default (
       <p>Hello World</p>
     </div>
   </Cmpt-Wrapper>
+);
+
+export const Test2 = (
+  <Cmpt-Global link={"cmpt.css"} extends="p">
+    Hello <slot name="attributes">World</slot>
+  </Cmpt-Global>
 );
