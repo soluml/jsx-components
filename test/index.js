@@ -4,7 +4,7 @@ export const OpenButton = (
     open={(oldValue, newValue) =>
       console.log("open", { oldValue, newValue }, this)
     }
-    disabled={function Test(oldValue, newValue) {
+    disabled={function (oldValue, newValue) {
       console.log("disabled", { oldValue, newValue }, this);
     }}
   >

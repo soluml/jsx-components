@@ -49,7 +49,7 @@ module.exports = function (babel) {
                 let { expression } = value;
                 const { code } = generator(expression);
 
-                if (typeof eval(code) === "function") {
+                if (eval(`typeof (${code})`) === "function") {
                   expression = parseExpression(`${code}.bind(this.shadow)`);
                 }
 
