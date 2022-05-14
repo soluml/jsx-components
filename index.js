@@ -57,7 +57,7 @@ module.exports = function (babel) {
           },
           {}
         );
-        const [observed, attributes] = Object.entries(props).reduce(
+        let [observed, attributes] = Object.entries(props).reduce(
           (acc, [name, value]) => {
             acc[+(typeof value !== "object")][name.toLowerCase()] = value;
 
@@ -72,8 +72,16 @@ module.exports = function (babel) {
             delegatesFocus = true,
             extends: ex,
             style,
-            ...rest
+            link: alink,
+            ..._ra
           } = attributes;
+          const { link: olink, ..._ro } = observed;
+
+          attributes = _ra;
+          observed = _ro;
+          link = alink || olink;
+
+          console.log({ link });
 
           const observedAttributes = t.ClassMethod(
             "get",
