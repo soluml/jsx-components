@@ -1,5 +1,3 @@
-const { default: generate } = require("@babel/generator");
-
 module.exports = function (babel) {
   const t = babel.types;
   const constFactory = function (identifier, memberExpression, arguments) {
@@ -35,7 +33,7 @@ module.exports = function (babel) {
               if (value?.type === "JSXExpressionContainer") {
                 const { expression } = value;
 
-                return eval(generate(expression).code);
+                return expression;
               }
 
               return value?.value ?? true;
@@ -50,7 +48,7 @@ module.exports = function (babel) {
         );
         const [observed, attributes] = Object.entries(props).reduce(
           (acc, [name, value]) => {
-            acc[+(typeof value !== "function")][name.toLowerCase()] = value;
+            acc[+(typeof value !== "object")][name.toLowerCase()] = value;
 
             return acc;
           },
@@ -134,6 +132,21 @@ module.exports = function (babel) {
                 )
               ),
               //
+              // this.attributes = { ... }
+              t.ExpressionStatement(
+                t.AssignmentExpression(
+                  "=",
+                  t.MemberExpression(
+                    t.ThisExpression(),
+                    t.Identifier("attributes")
+                  ),
+                  t.ObjectExpression(
+                    Object.entries(observed).map(([key, expression]) =>
+                      t.ObjectProperty(t.Identifier(key), expression)
+                    )
+                  )
+                )
+              ),
               // shadow.append()
               ...["style"].map((identifier) =>
                 t.ExpressionStatement(

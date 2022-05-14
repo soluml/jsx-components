@@ -1,6 +1,6 @@
 export default (
   <Wrapper
-    style="asda"
+    style="aasda"
     open={(oldValue, newValue) => console.log("open", { oldValue, newValue })}
   >
     <div>
