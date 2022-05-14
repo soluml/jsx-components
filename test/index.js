@@ -19,6 +19,6 @@ const defaultSubject = "World";
 
 export const MyParagraph = (
   <Cmpt-My-Paragraph style="aasda" link={"p.css"} extends="p">
-    Hello <slot name={slotName}>{World}</slot>!
+    Hello <slot name={slotName}>{defaultSubject}</slot>!
   </Cmpt-My-Paragraph>
 );
