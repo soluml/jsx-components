@@ -39,7 +39,7 @@ module.exports = function (babel) {
 
   function handleJSXText(node, varName) {
     const { start, end, value } = node;
-    const textName = "text_" + start + end;
+    const textName = "__t_" + start + end;
 
     return [
       constFactory(
@@ -51,7 +51,7 @@ module.exports = function (babel) {
     ];
   }
 
-  function handleJSXElement(node, skipProcessing, parentVarName) {
+  function handleJSXElement(node, firstRun, parentVarName) {
     const { openingElement } = node;
     let { children } = node;
     const elementName = openingElement.name.name;
@@ -76,31 +76,35 @@ module.exports = function (babel) {
         [name.name]: getValue(),
       };
     }, {});
+    const isOnEventRe = /^on[A-Z].+$/;
     const [observed, attributes] = Object.entries(props).reduce(
       (acc, [name, value]) => {
-        acc[+(typeof value !== "object")][name.toLowerCase()] = value;
+        if (firstRun) {
+          acc[+(typeof value !== "object")][name.toLowerCase()] = value;
+        } else {
+          acc[+!isOnEventRe.test(name)][name] = value;
+        }
 
         return acc;
       },
       [{}, {}]
     );
-    const varName = elementName + node.start + node.end;
+    const varName = "__" + elementName + node.start + node.end;
 
     if (children.length) {
       children = children.map((node) => {
         switch (node.type) {
           case "JSXText":
-            console.log("TEXT", node.value);
-            return handleJSXText(node, !skipProcessing && varName);
+            return handleJSXText(node, !firstRun && varName);
           case "JSXElement":
-            return handleJSXElement(node, false, !skipProcessing && varName);
+            return handleJSXElement(node, false, !firstRun && varName);
           default:
             throw new Error("Unaccounted for type: " + node.type);
         }
       });
     }
 
-    if (skipProcessing) {
+    if (firstRun) {
       return {
         openingElement,
         children,
@@ -109,14 +113,36 @@ module.exports = function (babel) {
         attributes,
       };
     } else {
+      console.log({ attributes });
+
       return [
+        //Create the element
         constFactory(
           varName,
           [t.Identifier("document"), t.Identifier("createElement")],
           [t.StringLiteral(elementName)]
         ),
+        // Handle the attributes
+        ...Object.entries(attributes).map(([name, value]) =>
+          t.ExpressionStatement(
+            t.CallExpression(
+              t.MemberExpression(
+                t.Identifier(varName),
+                t.Identifier("setAttribute")
+              ),
+
+              [
+                t.StringLiteral(name),
+                typeof value === "string" ? t.StringLiteral(value) : value,
+              ]
+            )
+          )
+        ),
+        // TODO: Handle the events
+
+        // append the children
         ...children,
-        // TODO: do attributes and event handlers
+        // Append to this.shadow
         appendChildFactory(varName, parentVarName),
       ];
     }
