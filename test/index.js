@@ -1,17 +1,16 @@
-export const Test = (
-  <Cmpt-Wrapper
-    style="aasda"
-    link={["reset.css", "cmpt.css"]}
+export const OpenButton = (
+  <Cmpt-OpenButton
+    link={["button.css", "dialog.css"]}
     open={(oldValue, newValue) => console.log("open", { oldValue, newValue })}
   >
     <div>
       <p>Hello World</p>
     </div>
-  </Cmpt-Wrapper>
+  </Cmpt-OpenButton>
 );
 
-export const Test2 = (
-  <Cmpt-Global link={"cmpt.css"} extends="p">
-    Hello <slot name="attributes">World</slot>
-  </Cmpt-Global>
+export const MyParagraph = (
+  <Cmpt-My-Paragraph style="aasda" link={"p.css"} extends="p">
+    Hello <slot name="subject">World</slot>
+  </Cmpt-My-Paragraph>
 );
