@@ -26,6 +26,17 @@ module.exports = function (babel) {
       JSXElement(path) {
         const openingElement = path.node.openingElement;
         const elementName = openingElement.name.name;
+
+        if (!elementName.includes("-")) {
+          throw new Error(
+            `
+            Custom Element names must contain a dash (https://html.spec.whatwg.org/#valid-custom-element-name)
+            
+            Got: "${elementName}"
+            `
+          );
+        }
+
         const isWrappingElement = path.parentPath.type !== "JSXElement";
         const props = openingElement.attributes.reduce(
           (acc, { name, value }) => {
@@ -62,16 +73,6 @@ module.exports = function (babel) {
             style,
             ...rest
           } = attributes;
-
-          const definition = t.ExpressionStatement(
-            t.CallExpression(
-              t.MemberExpression(
-                t.Identifier("customElements"),
-                t.Identifier("define")
-              ),
-              [t.StringLiteral(elementName), t.Identifier(elementName)]
-            )
-          );
 
           const observedAttributes = t.ClassMethod(
             "get",
@@ -187,15 +188,25 @@ module.exports = function (babel) {
             ])
           );
 
+          const ClassExpression = t.ClassExpression(
+            t.Identifier(elementName.replace("-", "")),
+            t.Identifier("HTMLElement"),
+            t.ClassBody([
+              observedAttributes,
+              constructor,
+              attributeChangedCallback,
+            ])
+          );
+
           path.replaceWith(
-            t.ClassDeclaration(
-              t.Identifier(elementName),
-              t.Identifier("HTMLElement"),
-              t.ClassBody([
-                observedAttributes,
-                constructor,
-                attributeChangedCallback,
-              ])
+            t.ExpressionStatement(
+              t.CallExpression(
+                t.MemberExpression(
+                  t.Identifier("customElements"),
+                  t.Identifier("define")
+                ),
+                [t.StringLiteral(elementName.toLowerCase()), ClassExpression]
+              )
             )
           );
         } else {
