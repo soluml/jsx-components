@@ -48,13 +48,14 @@ module.exports = function (babel) {
           },
           {}
         );
+        const [observed, attributes] = Object.entries(props).reduce(
+          (acc, [name, value]) => {
+            acc[+(typeof value !== "function")][name.toLowerCase()] = value;
 
-        // const [events, attributes] = Object.entries(props).reduce(
-        //   (acc, [name, value]) => {
-        //     console.log({ name, value });
-        //   },
-        //   [{}, {}]
-        // );
+            return acc;
+          },
+          [{}, {}]
+        );
 
         if (isWrappingElement) {
           const {
@@ -62,7 +63,7 @@ module.exports = function (babel) {
             delegatesFocus = true,
             style,
             ...rest
-          } = props;
+          } = attributes;
 
           const definition = t.ExpressionStatement(
             t.CallExpression(
@@ -72,6 +73,21 @@ module.exports = function (babel) {
               ),
               [t.StringLiteral(elementName), t.Identifier(elementName)]
             )
+          );
+
+          const observedAttributes = t.ClassMethod(
+            "get",
+            t.Identifier("observedAttributes"),
+            [],
+            t.BlockStatement([
+              t.ReturnStatement(
+                t.ArrayExpression(
+                  Object.keys(observed).map((n) => t.stringLiteral(n))
+                )
+              ),
+            ]),
+            false,
+            true
           );
 
           const constructor = t.ClassMethod(
@@ -137,7 +153,7 @@ module.exports = function (babel) {
             t.ClassDeclaration(
               t.Identifier(elementName),
               t.Identifier("HTMLElement"),
-              t.ClassBody([constructor])
+              t.ClassBody([observedAttributes, constructor])
             )
           );
         } else {

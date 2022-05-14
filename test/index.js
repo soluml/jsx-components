@@ -1,10 +1,5 @@
 export default (
-  <Wrapper
-    style="asda"
-    onOpen={(...rest) => console.log("open", { rest })}
-    open={false}
-    disabled
-  >
+  <Wrapper style="asda" open={(...rest) => console.log("open", { rest })}>
     <div>
       <p>Hello World</p>
     </div>
