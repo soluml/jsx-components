@@ -1,4 +1,5 @@
 const { default: generator } = require("@babel/generator");
+const { parseExpression } = require("@babel/parser");
 
 module.exports = function (babel) {
   const t = babel.types;
@@ -44,7 +45,12 @@ module.exports = function (babel) {
           (acc, { name, value }) => {
             function getValue() {
               if (value?.type === "JSXExpressionContainer") {
-                const { expression } = value;
+                let { expression } = value;
+                const { code } = generator(expression);
+
+                if (typeof eval(code) === "function") {
+                  expression = parseExpression(`${code}.bind(shadow)`);
+                }
 
                 return expression;
               }
