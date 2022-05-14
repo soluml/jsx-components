@@ -166,11 +166,7 @@ module.exports = function (babel) {
           const attributeChangedCallback = t.ClassMethod(
             "method",
             t.Identifier("attributeChangedCallback"),
-            [
-              t.Identifier("name"),
-              t.Identifier("oldValue"),
-              t.Identifier("newValue"),
-            ],
+            [t.Identifier("name"), t.RestElement(t.Identifier("rest"))],
             t.BlockStatement([
               t.ExpressionStatement(
                 t.CallExpression(
@@ -182,7 +178,7 @@ module.exports = function (babel) {
                     t.Identifier("name"),
                     true
                   ),
-                  [t.Identifier("oldValue"), t.Identifier("newValue")]
+                  [t.SpreadElement(t.Identifier("rest"))]
                 )
               ),
             ])
