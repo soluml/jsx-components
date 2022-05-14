@@ -15,44 +15,43 @@ module.exports = function (babel) {
     ]);
   };
 
+  const appendChildFactory = function (name, appendee) {
+    return appendee
+      ? t.ExpressionStatement(
+          t.CallExpression(
+            t.MemberExpression(
+              t.Identifier(appendee),
+              t.Identifier("appendChild")
+            ),
+            [t.identifier(name)]
+          )
+        )
+      : t.ExpressionStatement(
+          t.CallExpression(
+            t.MemberExpression(
+              t.MemberExpression(t.ThisExpression(), t.Identifier("shadow")),
+              t.Identifier("appendChild")
+            ),
+            [t.identifier(name)]
+          )
+        );
+  };
+
   function handleJSXText(node, varName) {
     const { start, end, value } = node;
-    const textName = "text" + start + end;
+    const textName = "text_" + start + end;
 
-    const arr = [
+    return [
       constFactory(
         textName,
         [t.Identifier("document"), t.Identifier("createTextNode")],
         [t.StringLiteral(value)]
       ),
+      appendChildFactory(textName, varName),
     ];
-
-    arr.push(
-      varName
-        ? t.ExpressionStatement(
-            t.CallExpression(
-              t.MemberExpression(
-                t.Identifier(varName),
-                t.Identifier("appendChild")
-              ),
-              [t.identifier(textName)]
-            )
-          )
-        : t.ExpressionStatement(
-            t.CallExpression(
-              t.MemberExpression(
-                t.MemberExpression(t.ThisExpression(), t.Identifier("shadow")),
-                t.Identifier("appendChild")
-              ),
-              [t.identifier(textName)]
-            )
-          )
-    );
-
-    return arr;
   }
 
-  function handleJSXElement(node, skipProcessing) {
+  function handleJSXElement(node, skipProcessing, parentVarName) {
     const { openingElement } = node;
     let { children } = node;
     const elementName = openingElement.name.name;
@@ -85,17 +84,16 @@ module.exports = function (babel) {
       },
       [{}, {}]
     );
+    const varName = elementName + node.start + node.end;
 
     if (children.length) {
       children = children.map((node) => {
         switch (node.type) {
           case "JSXText":
-            return handleJSXText(
-              node,
-              !skipProcessing && elementName + node.start + node.end
-            );
+            console.log("TEXT", node.value);
+            return handleJSXText(node, !skipProcessing && varName);
           case "JSXElement":
-            return handleJSXElement(node);
+            return handleJSXElement(node, false, !skipProcessing && varName);
           default:
             throw new Error("Unaccounted for type: " + node.type);
         }
@@ -111,7 +109,16 @@ module.exports = function (babel) {
         attributes,
       };
     } else {
-      console.log("");
+      return [
+        constFactory(
+          varName,
+          [t.Identifier("document"), t.Identifier("createElement")],
+          [t.StringLiteral(elementName)]
+        ),
+        ...children,
+        // TODO: do attributes and event handlers
+        appendChildFactory(varName, parentVarName),
+      ];
     }
   }
 
@@ -173,9 +180,9 @@ module.exports = function (babel) {
           true
         );
 
-        console.log("=========================");
-        console.log(JSON.stringify(children.flat(Infinity), null, 2));
-        console.log("=========================");
+        // console.log("=========================");
+        // console.log(JSON.stringify(children.flat(Infinity), null, 2));
+        // console.log("=========================");
 
         const constructor = t.ClassMethod(
           "constructor",
@@ -306,7 +313,7 @@ module.exports = function (babel) {
               )
             ),
             // rest append()
-            ...children.flat(Infinity).filter((n) => n), //TODO: remove filter once done
+            ...children.flat(Infinity),
           ])
         );
 
