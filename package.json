@@ -1,0 +1,13 @@
+{
+  "name": "jsx-components",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "babel ./test/index.js"
+  },
+  "dependencies": {
+    "@babel/cli": "^7.17.10",
+    "@babel/core": "^7.17.10"
+  }
+}
