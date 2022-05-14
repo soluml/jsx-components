@@ -51,6 +51,21 @@ module.exports = function (babel) {
     ];
   }
 
+  function JSXExpressionContainer(node, varName) {
+    const { start, end } = node;
+
+    const textName = "__tc_" + start + end;
+
+    return [
+      constFactory(
+        textName,
+        [t.Identifier("document"), t.Identifier("createTextNode")],
+        [node]
+      ),
+      appendChildFactory(textName, varName),
+    ];
+  }
+
   function handleJSXElement(node, firstRun, parentVarName) {
     const { openingElement } = node;
     let { children } = node;
@@ -96,6 +111,11 @@ module.exports = function (babel) {
         switch (node.type) {
           case "JSXText":
             return handleJSXText(node, !firstRun && varName);
+          case "JSXExpressionContainer":
+            return JSXExpressionContainer(
+              node.expression,
+              !firstRun && varName
+            );
           case "JSXElement":
             return handleJSXElement(node, false, !firstRun && varName);
           default:
@@ -113,7 +133,7 @@ module.exports = function (babel) {
         attributes,
       };
     } else {
-      console.log({ attributes });
+      // console.log({ attributes });
 
       return [
         //Create the element

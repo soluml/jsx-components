@@ -14,8 +14,11 @@ export const OpenButton = (
   </Cmpt-OpenButton>
 );
 
+const slotName = "subject";
+const defaultSubject = "World";
+
 export const MyParagraph = (
   <Cmpt-My-Paragraph style="aasda" link={"p.css"} extends="p">
-    Hello <slot name="subject">World</slot>!
+    Hello <slot name={slotName}>{World}</slot>!
   </Cmpt-My-Paragraph>
 );
