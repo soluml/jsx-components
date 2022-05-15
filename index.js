@@ -97,7 +97,11 @@ module.exports = function (babel) {
         if (firstRun) {
           acc[+(typeof value !== "object")][name.toLowerCase()] = value;
         } else {
-          acc[+!isOnEventRe.test(name)][name] = value;
+          if (isOnEventRe.test(name)) {
+            acc[0][name.slice(2).toLowerCase()] = value;
+          } else {
+            acc[1][name] = value;
+          }
         }
 
         return acc;
