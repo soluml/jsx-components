@@ -77,7 +77,7 @@ module.exports = function (babel) {
           const { code } = generator(expression);
 
           if (eval(`typeof (${code})`) === "function") {
-            expression = parseExpression(`${code}.bind(this.shadow)`);
+            expression = parseExpression(`(${code}).bind(this)`);
           }
 
           return expression;
@@ -137,8 +137,6 @@ module.exports = function (babel) {
         attributes,
       };
     } else {
-      console.log({ observed });
-
       return [
         //Create the element
         constFactory(
@@ -162,7 +160,19 @@ module.exports = function (babel) {
             )
           )
         ),
-        // TODO: Handle the events
+        // Handle the events
+        ...Object.entries(observed).map(([event, fn]) =>
+          t.ExpressionStatement(
+            t.CallExpression(
+              t.MemberExpression(
+                t.Identifier(varName),
+                t.Identifier("addEventListener")
+              ),
+
+              [t.StringLiteral(event), fn]
+            )
+          )
+        ),
 
         // append the children
         ...children,
