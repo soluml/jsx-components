@@ -4,12 +4,20 @@
   "description": "Transforms JSX into Web Components",
   "main": "index.js",
   "scripts": {
-    "start": "babel ./test/components.web.jsx"
+    "babel": "babel ./example/components.web.jsx",
+    "build": "webpack",
+    "prestart": "npm run build",
+    "start": "npx http-server docs"
   },
   "devDependencies": {
     "@babel/cli": "^7.17.10",
     "@babel/core": "^7.17.10",
     "@babel/generator": "^7.17.10",
-    "@babel/parser": "^7.17.10"
+    "@babel/parser": "^7.17.10",
+    "babel-loader": "^8.2.5",
+    "html-webpack-plugin": "^5.5.0",
+    "raw-loader": "^4.0.2",
+    "webpack": "^5.72.1",
+    "webpack-cli": "^4.9.2"
   }
 }
