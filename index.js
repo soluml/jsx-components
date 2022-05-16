@@ -53,14 +53,18 @@ module.exports = function (babel) {
 
   function JSXExpressionContainer(node, varName) {
     const { start, end } = node;
-
     const textName = "__tc_" + start + end;
 
     return [
       constFactory(
         textName,
         [t.Identifier("document"), t.Identifier("createTextNode")],
-        [node]
+        [
+          t.CallExpression(
+            t.MemberExpression(node, t.Identifier("toString")),
+            []
+          ),
+        ]
       ),
       appendChildFactory(textName, varName),
     ];
