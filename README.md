@@ -22,8 +22,11 @@ super();
 
 const test = (
 <Wrapper style="test">
+
 <div>
 <p>Hello World</p>
 </div>
 </Wrapper>
 );
+
+TODO: Support extends

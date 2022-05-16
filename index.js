@@ -29,7 +29,10 @@ module.exports = function (babel) {
       : t.ExpressionStatement(
           t.CallExpression(
             t.MemberExpression(
-              t.MemberExpression(t.ThisExpression(), t.Identifier("shadow")),
+              t.MemberExpression(
+                t.ThisExpression(),
+                t.Identifier("shadowRoot")
+              ),
               t.Identifier("appendChild")
             ),
             [t.identifier(name)]
@@ -186,7 +189,7 @@ module.exports = function (babel) {
     }
   }
 
-  const obj = {
+  return {
     name: "jsx-components",
     manipulateOptions(opts, parserOpts) {
       parserOpts.plugins.push("jsx");
@@ -251,29 +254,25 @@ module.exports = function (babel) {
           t.BlockStatement([
             // super()
             t.ExpressionStatement(t.CallExpression(t.identifier("super"), [])),
-            // this.shadow = this.attachShadow
+            // this.shadow = this.attachShadow // TODO: remove the this
             t.ExpressionStatement(
-              t.AssignmentExpression(
-                "=",
-                t.MemberExpression(t.ThisExpression(), t.Identifier("shadow")),
-                t.CallExpression(
-                  t.MemberExpression(
-                    t.ThisExpression(),
-                    t.Identifier("attachShadow")
-                  ),
-                  [
-                    t.ObjectExpression([
-                      t.ObjectProperty(
-                        t.Identifier("mode"),
-                        t.stringLiteral(mode)
-                      ),
-                      t.ObjectProperty(
-                        t.Identifier("delegatesFocus"),
-                        t.BooleanLiteral(delegatesFocus)
-                      ),
-                    ]),
-                  ]
-                )
+              t.CallExpression(
+                t.MemberExpression(
+                  t.ThisExpression(),
+                  t.Identifier("attachShadow")
+                ),
+                [
+                  t.ObjectExpression([
+                    t.ObjectProperty(
+                      t.Identifier("mode"),
+                      t.stringLiteral(mode)
+                    ),
+                    t.ObjectProperty(
+                      t.Identifier("delegatesFocus"),
+                      t.BooleanLiteral(delegatesFocus)
+                    ),
+                  ]),
+                ]
               )
             ),
             // const link = document.createElement('link')
@@ -339,13 +338,13 @@ module.exports = function (babel) {
                 ]
               : []),
             //
-            // this.attributes = { ... }
+            // this.cmptAttributes = { ... }
             t.ExpressionStatement(
               t.AssignmentExpression(
                 "=",
                 t.MemberExpression(
                   t.ThisExpression(),
-                  t.Identifier("attributes")
+                  t.Identifier("cmptAttributes")
                 ),
                 t.ObjectExpression(
                   Object.entries(observed).map(([key, expression]) =>
@@ -364,7 +363,7 @@ module.exports = function (babel) {
                   t.MemberExpression(
                     t.MemberExpression(
                       t.ThisExpression(),
-                      t.Identifier("shadow")
+                      t.Identifier("shadowRoot")
                     ),
                     t.Identifier("appendChild")
                   ),
@@ -387,7 +386,7 @@ module.exports = function (babel) {
                 t.MemberExpression(
                   t.MemberExpression(
                     t.ThisExpression(),
-                    t.Identifier("attributes")
+                    t.Identifier("cmptAttributes")
                   ),
                   t.Identifier("name"),
                   true
@@ -398,13 +397,15 @@ module.exports = function (babel) {
           ])
         );
 
-        const extension = ex
-          ? [
-              t.ObjectExpression([
-                t.ObjectProperty(t.Identifier("extends"), t.StringLiteral(ex)),
-              ]),
-            ]
-          : [];
+        // TODO: Support Extensions: https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements#customized_built-in_elements
+        const extension = [];
+        // const extension = ex
+        //   ? [
+        //       t.ObjectExpression([
+        //         t.ObjectProperty(t.Identifier("extends"), t.StringLiteral(ex)),
+        //       ]),
+        //     ]
+        //   : [];
 
         const ClassExpression = t.ClassExpression(
           t.Identifier(elementName.replaceAll("-", "")),
@@ -434,6 +435,4 @@ module.exports = function (babel) {
       },
     },
   };
-
-  return obj;
 };
