@@ -1,12 +1,12 @@
 {
   "name": "jsx-components",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.0-alpha",
+  "description": "Transforms JSX into Web Components",
   "main": "index.js",
   "scripts": {
-    "start": "babel ./test/index.js"
+    "start": "babel ./test/components.web.jsx"
   },
-  "dependencies": {
+  "devDependencies": {
     "@babel/cli": "^7.17.10",
     "@babel/core": "^7.17.10",
     "@babel/generator": "^7.17.10",
