@@ -16,8 +16,16 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.web.jsx$/,
+        test: /\.web.jsx$/i,
         use: "babel-loader",
+      },
+      {
+        test: /\.css$/i,
+        exclude: /paragraph.css/,
+        loader: "file-loader",
+        options: {
+          name: "[name].[ext]",
+        },
       },
     ],
   },
