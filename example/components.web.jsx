@@ -25,7 +25,7 @@ const slotName = "subject";
 const defaultSubject = "World";
 
 export const MyParagraph = (
-  <Cmpt-My-Paragraph style={paragraphCSS}>
+  <Cmpt-My-Paragraph style={paragraphCSS} extends="p">
     Hello <slot name={slotName}>{defaultSubject}</slot>!
   </Cmpt-My-Paragraph>
 );

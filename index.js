@@ -1,5 +1,6 @@
 const { default: generator } = require("@babel/generator");
 const { parseExpression } = require("@babel/parser");
+const htmlClass = require("html-class");
 
 module.exports = function (babel) {
   const t = babel.types;
@@ -218,7 +219,7 @@ module.exports = function (babel) {
         const {
           mode = "open",
           delegatesFocus = true,
-          extends: ex,
+          extends: ex = "",
           style,
           link: alink,
           ..._ra
@@ -397,19 +398,17 @@ module.exports = function (babel) {
           ])
         );
 
-        // TODO: Support Extensions: https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements#customized_built-in_elements
-        const extension = [];
-        // const extension = ex
-        //   ? [
-        //       t.ObjectExpression([
-        //         t.ObjectProperty(t.Identifier("extends"), t.StringLiteral(ex)),
-        //       ]),
-        //     ]
-        //   : [];
+        const extension = ex
+          ? [
+              t.ObjectExpression([
+                t.ObjectProperty(t.Identifier("extends"), t.StringLiteral(ex)),
+              ]),
+            ]
+          : [];
 
         const ClassExpression = t.ClassExpression(
           t.Identifier(elementName.replaceAll("-", "")),
-          t.Identifier("HTMLElement"),
+          t.Identifier(htmlClass.get(ex) || "HTMLElement"),
           t.ClassBody([
             observedAttributes,
             constructor,

@@ -16,6 +16,7 @@
     "@babel/parser": "^7.17.10",
     "babel-loader": "^8.2.5",
     "file-loader": "^6.2.0",
+    "html-class": "^1.2.0",
     "html-webpack-plugin": "^5.5.0",
     "raw-loader": "^4.0.2",
     "webpack": "^5.72.1",
