@@ -255,7 +255,7 @@ module.exports = function (babel) {
           t.BlockStatement([
             // super()
             t.ExpressionStatement(t.CallExpression(t.identifier("super"), [])),
-            // this.shadow = this.attachShadow // TODO: remove the this
+            // this.shadow = this.attachShadow
             t.ExpressionStatement(
               t.CallExpression(
                 t.MemberExpression(
