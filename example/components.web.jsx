@@ -1,6 +1,6 @@
-import paragraphCSS from "raw-loader!./paragraph.css";
-import buttonCSS from "./button.css";
-import dialogCSS from "./dialog.css";
+import paragraphCSS from "paragraph.raw.css!=!./paragraph.css";
+import buttonCSS from "button.file.css!=!./button.css";
+import dialogCSS from "dialog.file.css!=!./dialog.css";
 
 console.log({ buttonCSS, dialogCSS, paragraphCSS });
 

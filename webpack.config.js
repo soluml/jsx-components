@@ -20,8 +20,11 @@ module.exports = {
         use: "babel-loader",
       },
       {
-        test: /\.css$/i,
-        exclude: /paragraph.css/,
+        test: /\.raw\.[a-z]+$/i,
+        loader: "raw-loader",
+      },
+      {
+        test: /\.file\.[a-z]+$/i,
         loader: "file-loader",
         options: {
           name: "[name].[ext]",
