@@ -84,9 +84,11 @@ module.exports = function (babel) {
           let { expression } = value;
           const { code } = generator(expression);
 
-          if (eval(`typeof (${code})`) === "function") {
-            expression = parseExpression(`(${code}).bind(this)`);
-          }
+          try {
+            if (eval(`typeof (${code})`) === "function") {
+              expression = parseExpression(`(${code}).bind(this)`);
+            }
+          } catch (e) {}
 
           return expression;
         }
@@ -102,11 +104,29 @@ module.exports = function (babel) {
     const isOnEventRe = /^on[A-Z].+$/;
     const [observed, attributes] = Object.entries(props).reduce(
       (acc, [name, value]) => {
+        name = name.toLowerCase();
+
         if (firstRun) {
-          acc[+(typeof value !== "object")][name.toLowerCase()] = value;
+          let type = +(typeof value !== "object");
+
+          if (type === 0) {
+            if (name === "style") {
+              type = 1;
+            }
+
+            if (name === "link") {
+              type = 1;
+
+              if (value.type === "ArrayExpression") {
+                value = value.elements;
+              }
+            }
+          }
+
+          acc[type][name] = value;
         } else {
           if (isOnEventRe.test(name)) {
-            acc[0][name.slice(2).toLowerCase()] = value;
+            acc[0][name.slice(2)] = value;
           } else {
             acc[1][name] = value;
           }
@@ -229,7 +249,7 @@ module.exports = function (babel) {
         attributes = _ra;
         observed = _ro;
         link =
-          (alink ? [alink] : undefined) ||
+          (alink ? [alink].flat(Infinity) : undefined) ||
           (olink ? [eval(generator(olink).code)].flat(Infinity) : undefined) ||
           [];
 
@@ -309,7 +329,7 @@ module.exports = function (babel) {
                               t.Identifier(key),
                               t.Identifier("href")
                             ),
-                            t.stringLiteral(l)
+                            typeof l === "string" ? t.stringLiteral(l) : l
                           )
                         ),
                       ];
@@ -333,7 +353,7 @@ module.exports = function (babel) {
                         t.Identifier("style"),
                         t.Identifier("textContent")
                       ),
-                      t.stringLiteral(style)
+                      typeof style === "string" ? t.stringLiteral(style) : style
                     )
                   ),
                 ]

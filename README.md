@@ -29,4 +29,6 @@ const test = (
 </Wrapper>
 );
 
-TODO: Support extends
+TODO:
+
+Fix Extends
